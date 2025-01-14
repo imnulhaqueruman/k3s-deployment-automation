@@ -1,4 +1,3 @@
----
 name: K3s deployment using Ansible
 
 on:
@@ -37,14 +36,10 @@ jobs:
       - name: Save Pulumi outputs
         id: pulumi_outputs
         run: |
-          GIT_RUNNER_IP=$(pulumi stack output git_runner_public_ip --cwd infra)
-          MASTER_NODE_IP=$(pulumi stack output master_private_ip --cwd infra)
-          WORKER_NODE1_IP=$(pulumi stack output worker1_private_ip --cwd infra)
-          WORKER_NODE2_IP=$(pulumi stack output worker2_private_ip --cwd infra)
-          echo "GIT_RUNNER_IP=$GIT_RUNNER_IP" >> $GITHUB_ENV
-          echo "MASTER_NODE_IP=$MASTER_NODE_IP" >> $GITHUB_ENV
-          echo "WORKER_NODE1_IP=$WORKER_NODE1_IP" >> $GITHUB_ENV
-          echo "WORKER_NODE2_IP=$WORKER_NODE2_IP" >> $GITHUB_ENV
+          echo "GIT_RUNNER_IP=$(pulumi stack output git_runner_public_ip --cwd infra)" >> $GITHUB_ENV
+          echo "MASTER_NODE_IP=$(pulumi stack output master_private_ip --cwd infra)" >> $GITHUB_ENV
+          echo "WORKER_NODE1_IP=$(pulumi stack output worker1_private_ip --cwd infra)" >> $GITHUB_ENV
+          echo "WORKER_NODE2_IP=$(pulumi stack output worker2_private_ip --cwd infra)" >> $GITHUB_ENV
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
 
@@ -53,21 +48,13 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Copy SSH Private Key to Public Instance Git-runner
-        run: |
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > my-key-pair.pem
-          chmod 600 my-key-pair.pem
-          scp -o StrictHostKeyChecking=no my-key-pair.pem ubuntu@${{ env.GIT_RUNNER_IP }}:~/.ssh/
-      
       - name: Copy Ansible directory to GitHub Runner
         run: |
           scp -o StrictHostKeyChecking=no -r $GITHUB_WORKSPACE/ansible ubuntu@${{ env.GIT_RUNNER_IP }}:/home/ubuntu/
 
-      - name: SSH into GitHub Runner and Copy the host ips
+      - name: Update Ansible inventory file
         run: |
           ssh -o StrictHostKeyChecking=no ubuntu@${{ env.GIT_RUNNER_IP }} << 'EOF'
-
-          # Update inventory file with dynamic IPs
           sed -i "s/^master-node ansible_host=.*/master-node ansible_host=${{ env.MASTER_NODE_IP }}/" /home/ubuntu/ansible/inventory/hosts.ini
           sed -i "s/^worker-node-1 ansible_host=.*/worker-node-1 ansible_host=${{ env.WORKER_NODE1_IP }}/" /home/ubuntu/ansible/inventory/hosts.ini
           sed -i "s/^worker-node-2 ansible_host=.*/worker-node-2 ansible_host=${{ env.WORKER_NODE2_IP }}/" /home/ubuntu/ansible/inventory/hosts.ini
@@ -76,5 +63,7 @@ jobs:
       - name: Run the Ansible playbook
         run: |
           ssh -o StrictHostKeyChecking=no ubuntu@${{ env.GIT_RUNNER_IP }} << 'EOF'
-          cd ansible  -i inventory/hosts.ini site.yml
+          cd /home/ubuntu/ansible
+          ansible-playbook -i inventory/hosts.ini site.yml
           EOF
+
