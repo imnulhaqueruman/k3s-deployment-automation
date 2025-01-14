@@ -66,5 +66,3 @@ jobs:
           cd /home/ubuntu/ansible
           ansible-playbook -i inventory/hosts.ini site.yml
           EOF
-
-# k3s
