@@ -1,11 +1,11 @@
-name: Deploy infrastructure
+name: Deploy Infrastructure
 
 on:
   push:
     branches:
       - main
     paths:
-      - infra/**
+      - Infra/**
 
 jobs:
   deploy:
@@ -43,21 +43,21 @@ jobs:
 
 
       - name: Pulumi stack select
-        run: pulumi stack select dev --cwd infra
+        run: pulumi stack select dev --cwd Infra
 
       - name: Pulumi refresh
-        run: pulumi refresh --yes --cwd infra
+        run: pulumi refresh --yes --cwd Infra
 
       - name: Pulumi up
-        run: pulumi up --yes --cwd infra
+        run: pulumi up --yes --cwd Infra
 
       - name: Save Pulumi outputs
         id: pulumi_outputs
         run: |
-          GIT_RUNNER_IP=$(pulumi stack output git_runner_public_ip --cwd infra)
-          MASTER_IP=$(pulumi stack output master_private_ip --cwd infra)
-          WORKER1_IP=$(pulumi stack output worker1_private_ip --cwd infra)
-          WORKER2_IP=$(pulumi stack output worker2_private_ip --cwd infra)
+          GIT_RUNNER_IP=$(pulumi stack output git_runner_public_ip --cwd Infra)
+          MASTER_IP=$(pulumi stack output master_private_ip --cwd Infra)
+          WORKER1_IP=$(pulumi stack output worker1_private_ip --cwd Infra)
+          WORKER2_IP=$(pulumi stack output worker2_private_ip --cwd Infra)
           
           echo "GIT_RUNNER_IP=$GIT_RUNNER_IP" >> $GITHUB_ENV
           echo "MASTER_IP=$MASTER_IP" >> $GITHUB_ENV

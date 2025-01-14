@@ -2,7 +2,7 @@ name: Setup GitHub Runner and Ansible
 
 on:
   workflow_run:
-    workflows: ["Deploy infrastructure"]
+    workflows: ["Deploy Infrastructure"]
     types:
       - completed
 
@@ -27,18 +27,18 @@ jobs:
         run: pulumi login
 
       - name: Pulumi stack select
-        run: pulumi stack select dev --cwd infra
+        run: pulumi stack select dev --cwd Infra
 
       - name: Pulumi refresh
-        run: pulumi refresh --yes --cwd infra
+        run: pulumi refresh --yes --cwd Infra
       
       - name: Save Pulumi outputs
         id: pulumi_outputs
         run: |
-          GIT_RUNNER_IP=$(pulumi stack output git_runner_public_ip --cwd infra)
-          MASTER_NODE_IP=$(pulumi stack output master_private_ip --cwd infra)
-          WORKER_NODE1_IP=$(pulumi stack output worker1_private_ip --cwd infra)
-          WORKER_NODE2_IP=$(pulumi stack output worker2_private_ip --cwd infra)
+          GIT_RUNNER_IP=$(pulumi stack output git_runner_public_ip --cwd Infra)
+          MASTER_NODE_IP=$(pulumi stack output master_private_ip --cwd Infra)
+          WORKER_NODE1_IP=$(pulumi stack output worker1_private_ip --cwd Infra)
+          WORKER_NODE2_IP=$(pulumi stack output worker2_private_ip --cwd Infra)
           echo "GIT_RUNNER_IP=$GIT_RUNNER_IP" >> $GITHUB_ENV
           echo "MASTER_NODE_IP=$MASTER_NODE_IP" >> $GITHUB_ENV
           echo "WORKER_NODE1_IP=$WORKER_NODE1_IP" >> $GITHUB_ENV
