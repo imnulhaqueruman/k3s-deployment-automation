@@ -32,7 +32,15 @@ public_subnet = ec2.Subnet('public-subnet',
         'Name': 'public-subnet',
     }
 )
-
+public_subnet = ec2.Subnet('public-subnet2',
+    vpc_id=vpc.id,
+    cidr_block='10.0.3.0/24',
+    map_public_ip_on_launch=True,
+    availability_zone='ap-southeast-1a',
+    tags={
+        'Name': 'public-subnet2',
+    }
+)
 private_subnet = ec2.Subnet('private-subnet',
     vpc_id=vpc.id,
     cidr_block='10.0.2.0/24',
